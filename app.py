@@ -1,4 +1,6 @@
 '''
+Written by Ivy O'Neal-Odom (Class of 2021 or 2020) during Fall 2019
+Edited by Abigail Tadlock (Class of 2023) during Fall 2022
 
 This program sorts Renegades players into their games.
 
@@ -57,26 +59,32 @@ csv = pd.DataFrame(csv)
 cols = csv.columns.to_list() 
 
 c = st.columns(3)
-first_name_col = c[0].selectbox("Choose the first name column", cols, key="first_name_column")
-last_name_col = c[1].selectbox("Choose the last name column", cols, key="last_name_column")
+first_name_col = c[0].selectbox("Choose the first name column", cols, key="first_name_column", index=None)
+last_name_col = c[1].selectbox("Choose the last name column", cols, key="last_name_column", index=None	)
 c = st.columns(3)
-email_col = c[0].selectbox("Choose the email column", cols, key="email_column")
-class_year_col = c[1].selectbox("Choose the class year column", cols, key="class_year_column")
-pronouns_col = c[2].selectbox("Choose the pronouns column", cols, key="pronouns_column")
+email_col = c[0].selectbox("Choose the email column", cols, key="email_column", index=None)
+class_year_col = c[1].selectbox("Choose the class year column", cols, key="class_year_column", index=None)
+pronouns_col = c[2].selectbox("Choose the pronouns column", cols, key="pronouns_column", index=None)
 
 c = st.columns(3)
-buddy_col = c[0].selectbox("Choose the buddy column", cols, key="buddy_column")
-enemy_col = c[1].selectbox("Choose the enemy column", cols, key="enemy_column")
+buddy_col = c[0].selectbox("Choose the buddy column", cols, key="buddy_column", index=None)
+enemy_col = c[1].selectbox("Choose the enemy column", cols, key="enemy_column", index=None)
 flags_cols = c[2].multiselect("Choose the flags columns", cols, key="flags_columns")
 
-c = st.columns(3)
-randseed = c[0].number_input("Random seed", value=1, min_value=1, max_value=1000000, key="randseed")
+if (first_name_col is None or last_name_col is None or email_col is None or class_year_col is None or pronouns_col is None or buddy_col is None or enemy_col is None):
+	st.error("Please select the columns")
+	st.stop()
+
 st.divider()
 
+tcols = [c for c in cols if c not in ["Timestamp", first_name_col, last_name_col, email_col, class_year_col, pronouns_col, buddy_col, enemy_col, *flags_cols]]
 st.write("#### Choose the columns that represent the games")
-game_cols_idx = st.dataframe(cols, selection_mode="multi-row", on_select="rerun", key="game_columns")["selection"]["rows"]
-game_cols = [cols[i] for i in game_cols_idx]
-# game_cols = st.multiselect("Choose the game columns", cols, key="game_columns")
+game_cols_idx = st.dataframe(tcols, selection_mode="multi-row", on_select="rerun", key="game_columns")["selection"]["rows"]
+if (len(game_cols_idx) == 0):
+	st.error("Please select at least one game column")
+	st.stop()
+
+game_cols = [tcols[i] for i in game_cols_idx]
 
 st.write("#### Let us know a little bit more about each game")
 games = {}
@@ -86,16 +94,17 @@ for col in game_cols:
 	c[0].write(col)
 	games[col]["min"] = c[1].number_input(f"Minimum players", value=3, min_value=1, max_value=20, key=f"min_{col}")
 	games[col]["max"] = c[2].number_input(f"Maximum players", value=5, min_value=1, max_value=20, key=f"max_{col}")
-	games[col]["short_name"] = c[3].text_input(f"Short name", value=col)
+	games[col]["short_name"] = c[3].text_input(f"Short name", value=col.replace("Rank your top game choices! Double check what time each game meets! [", "").replace("]", ""))
 
+st.divider()
+c = st.columns(3)
+randseed = c[0].number_input("Random seed", value=1, min_value=1, max_value=1000000, key="randseed")
 
 seniors = csv[csv["Class Year"] == SENIOR_YEAR]
 juniors = csv[csv["Class Year"] == JUNIOR_YEAR]
 sophmores = csv[csv["Class Year"] == SOPHMORE_YEAR]
 freshmen = csv[csv["Class Year"] == FRESHMAN_YEAR]
 other_year_students = csv[~csv["Class Year"].isin([SENIOR_YEAR, JUNIOR_YEAR, SOPHMORE_YEAR, FRESHMAN_YEAR])]
-
-st.write(f"Found {len(seniors)} seniors, {len(juniors)} juniors, {len(sophmores)} sophmores, {len(freshmen)} freshmen, and {len(other_year_students)} other year students")
 
 placement = {}
 id_vars = [first_name_col, last_name_col, email_col, buddy_col, enemy_col, class_year_col, pronouns_col, *flags_cols]
@@ -115,7 +124,6 @@ for class_year in [seniors, juniors, sophmores, freshmen, other_year_students]:
 		buddy_enemy = buddy_enemy + "*enemy[" + row[enemy_col] + "]" if pd.notna(row[enemy_col]) else buddy_enemy
 		player_prefs = row["game_pref"]
 		placement[player_name] = None
-		# for preference, rating in preferences.values.tolist()[0]:
 		for x in player_prefs:
 			preference = x[0]
 			rating = x[1]
@@ -124,7 +132,6 @@ for class_year in [seniors, juniors, sophmores, freshmen, other_year_students]:
 					warning = "PLAYER IN PLEASE NO! "
 				else:
 					warning = ""
-				# placement[player_name] = warning + games[preference]["short_name"] + " rating: " + str(rating) + buddy_enemy
 				placement[player_name] = {
 					"game": games[preference]["short_name"],
 					"rating": rating,
@@ -136,7 +143,6 @@ for class_year in [seniors, juniors, sophmores, freshmen, other_year_students]:
 					"warning": warning,
 					**{flag: row[flag] for flag in flags_cols}
 				}
-				# games[preference]["players"].append(warning + player_name + " rating: " + str(rating) + buddy_enemy)
 				games[preference]["players"].append({
 					"player": player_name,
 					"rating": rating,
@@ -149,7 +155,6 @@ for class_year in [seniors, juniors, sophmores, freshmen, other_year_students]:
 				})
 				break
 
-st.divider()
 with st.container(border=True):
 	st.subheader(":violet[Placements]")
 	st.dataframe(pd.DataFrame.from_dict(placement, orient="index"), use_container_width=True)
