@@ -123,7 +123,7 @@ for class_year in [seniors, juniors, sophmores, freshmen, other_year_students]:
 		buddy_enemy =  " *buddy[" + row[buddy_col] + "]" if pd.notna(row[buddy_col]) else ""
 		buddy_enemy = buddy_enemy + "*enemy[" + row[enemy_col] + "]" if pd.notna(row[enemy_col]) else buddy_enemy
 		player_prefs = row["game_pref"]
-		placement[player_name] = None
+		placement[player_name] = {}
 		for x in player_prefs:
 			preference = x[0]
 			rating = x[1]
@@ -179,10 +179,10 @@ with st.container(border=True):
 	st.dataframe(unfilled_games, use_container_width=True)
 with st.container(border=True):
 	st.subheader("Lonely Players")
-	lonely_players = [k for k,v in placement.items() if v is None]
+	lonely_players = [k for k,v in placement.items() if len(v) == 0]
 	st.dataframe(lonely_players, use_container_width=True)
 with st.container(border=True):
 	st.subheader("Potentially Sad Players")
-	sad_player = [k for k,v in placement.items() if v["warning"] != ""]
+	sad_player = [k for k,v in placement.items() if "warning" in v and v["warning"] != ""]
 	st.dataframe(sad_player, use_container_width=True)
 
