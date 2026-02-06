@@ -33,7 +33,7 @@ st.set_page_config(layout="wide")
 st.title("Renegades Game Distribution")
 with st.container(border=True):
 	SENIOR_YEAR = st.number_input("Senior Year", value=datetime.datetime.now().year)
-	in_file = st.file_uploader("Upload CSV file")
+	in_file = st.file_uploader("Upload XSLX or CSV file")
 
 #Debugging Values
 # SENIOR_YEAR = 2023
@@ -41,7 +41,8 @@ JUNIOR_YEAR = SENIOR_YEAR + 1
 SOPHMORE_YEAR = JUNIOR_YEAR + 1
 FRESHMAN_YEAR = SOPHMORE_YEAR + 1
 
-POSSIBLE_PREFERENCES = [1, 2, 3, 4, 5] #Be sure to order these in decreasing order of desireability from left to right
+# Need both because some responses are strings (CSV) and some are integers (XLSX)
+POSSIBLE_PREFERENCES = [1, 2, 3, 4, 5, '1', '2', '3', '4', '5'] #Be sure to order these in decreasing order of desireability from left to right
 
 if in_file is None:
 	st.stop()
