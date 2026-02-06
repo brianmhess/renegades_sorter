@@ -99,7 +99,7 @@ for col in game_cols:
 
 st.divider()
 c = st.columns(3)
-randseed = c[0].number_input("Random seed", value=1, min_value=1, max_value=1000000, key="randseed", help="Change the number to get a different randomization.")
+randseed = c[0].number_input("Random seed :gray[(*Change the number to get a different randomization.*)]", value=1, min_value=1, max_value=1000000, key="randseed")
 
 seniors = csv[csv["Class Year"] == SENIOR_YEAR]
 juniors = csv[csv["Class Year"] == JUNIOR_YEAR]
